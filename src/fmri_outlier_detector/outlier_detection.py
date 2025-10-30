@@ -5,7 +5,6 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-import img2pdf
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -16,6 +15,9 @@ from matplotlib.colors import Normalize
 from matplotlib.gridspec import GridSpec
 from nilearn import datasets, plotting
 from nilearn.image import load_img
+
+# import img2pdf
+from PIL import Image
 
 
 def get_symmetric_percentile_bounds(
@@ -308,9 +310,33 @@ def get_mean_std_bounds(
     return vmin, vmax
 
 
+# def combine_pngs_to_pdf(png_files: List[str], pdf_path: str) -> None:
+#     """
+#     Combine PNG files into a single PDF.
+
+#     Args:
+#         png_files (List[str]): List of PNG file paths.
+#         pdf_path (str): Output PDF file path.
+#     """
+#     if not png_files:
+#         print('No PNG files to combine')
+#         return
+
+#     print(f'Combining {len(png_files)} PNG files into PDF: {pdf_path}')
+
+#     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+
+#     try:
+#         with open(pdf_path, 'wb') as f:
+#             f.write(img2pdf.convert(png_files))
+#         print(f'PDF created successfully: {pdf_path}')
+#     except Exception as e:
+#         print(f'Error creating PDF: {e}')
+
+
 def combine_pngs_to_pdf(png_files: List[str], pdf_path: str) -> None:
     """
-    Combine PNG files into a single PDF.
+    Combine PNG files into a single PDF using Pillow.
 
     Args:
         png_files (List[str]): List of PNG file paths.
@@ -325,8 +351,8 @@ def combine_pngs_to_pdf(png_files: List[str], pdf_path: str) -> None:
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
 
     try:
-        with open(pdf_path, 'wb') as f:
-            f.write(img2pdf.convert(png_files))
+        images = [Image.open(f).convert('RGB') for f in png_files]
+        images[0].save(pdf_path, save_all=True, append_images=images[1:])
         print(f'PDF created successfully: {pdf_path}')
     except Exception as e:
         print(f'Error creating PDF: {e}')
